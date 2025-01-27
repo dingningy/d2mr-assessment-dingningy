@@ -27,7 +27,13 @@ Run these chunks as written. Do not make changes to code except where noted if n
 
 ```{r}
 #| label: setup
-library(tidyverse)
+# Install required packages
+if(!require(tidyverse)){install.packages("tidyverse")}
+if(!require(effsize)){install.packages("effsize")}
+# List of required packages
+required_packages <- c("tidyverse","effsize")
+# Load all required packages
+lapply(required_packages, library, character.only = TRUE)
 set.seed(1234)
 ```
 
@@ -85,18 +91,55 @@ QUESTIONS:
 1. What are the differences between the messy dataset and the original midwest dataset?
 
 <!-- answer below -->
+They are different in terms of column names, column number, data types, observation orders, and data values: 
+
+1) Column names: While the original midwest dataset adopts lower cases, uniform abbrevations, and identical characters for column naming, the messy dataset uses upper cases for some columns with abbrevations for specific columns but whole words for others, it also uses numbers and spaces in column naming (e.g., Population over 18)
+
+2) Column number: While the original midwest dataset has 28 variables, the messy dataset has 27 variables. Specifically, the messy dataset does not have "percwhite" and "percblack" included. Nevertheless, it has an additional variable "Population per Sq Mile" that is not included in the original midwest dataset.
+
+3) Data types: The original midwest dataset has 28 variables, including integer, character, numeric,data. In contrast, the messy dataset has 27 variables, and all variables are character.
+
+4) Observation orders: While the original midwest dataset has observations sorted by state and county names (i.e., alphabetically ordered), the messy dataset displays a random order.
+
+5) Data values: The original midwest dataset provides complete data without missing values in a neat format (i.e., correct characters for state and county names). However, the messy dataset has missing values and incorrect characters as numbers for state and county names. 
 
 2. What are the biggest issues you need to address in cleaning?
 
 <!-- answer below -->
 
+1) Column Naming Conventions: Inconsistent naming conventions, including mixed cases, mixed abbreviations, and the use of numbers and spaces in column names. I will standardize column names to lowercase, unify abbreviations, and eliminate numerical values and spaces.
+
+2) Missing columns: I will add these columns to maintain consistency with the original dataset.
+
+3) Data types: I will change the data types of the variables to match the original dataset.
+
+4) Observation order: I will sort the observations by state and county names to match the original dataset.
+
+5) Data values: I will find missing values from the original dataset to fix the messy dataset and correct any incorrect characters in the messy dataset.
+
+
 3. Are there any differences between the messy dataset and the original dataset that you do not need or want to address in cleaning? If so, why (not)?
 
 <!-- answer below -->
+Yes, I actually think it will be good to keep the additional variable "Population per Sq Mile" in the messy dataset and replace the popdensity with it. It could be useful for analysis and provide additional insights that are not available in the original dataset since the area unit for calculating popdensity in the original dataset is unknown.
+
+Also, there is no need to change the data type for PID since it should be a character variable!
 
 4. Are there additional cleaning tasks you would like to perform beyond matching the original dataset? If so, what are they and why do you think they are important?
 
 <!-- answer below -->
+After matching the original dataset, I would like to perform additional cleaning tasks to improve the dataset's quality and usability: 
+
+1)Column (variable) names: I will rename the variables to make them more informative and easier to understand. For example, I will replace "perchsd" with "perc_high_school_diploma".
+
+2)Data types: I will change the data types of the variables to match their content. For example, I will change the data type of "inmetro" to factor variable to facilitate data analysis.
+
+3)Long format: I will convert the dataset from wide to long format to make it easier to analyze and visualize the data. 
+
+4)Decimal number of data values: I will round the decimal numbers to two to three decimal places to make the data more readable and consistent.
+
+5) I will add "percadult" to make the data more consistent with other data.
+
 
 # Cleaning
 
@@ -109,46 +152,248 @@ You can additionally/alternatively construct your cleaning in a single pipeline 
 ## Selecting, renaming, and reordering columns
 
 ```{r}
+#| label: Rename columns to lowercase
+
+# Step 1: Rename all columns except PID to lowercase
+messy.midwest <- messy.midwest %>%
+  rename_with(tolower) %>% 
+  rename (PID = pid)
+```
+
+
+```{r}
+#| label: Select and rename columns
+
+# Step 2: Select and rename columns to match original dataset with more informative names
+messy.midwest <- messy.midwest %>%
+  select(
+    `c0unty name`,  
+    `area (sq miles)`,  
+    `total p0pulation`,
+    `population density`,
+     percamerindan,
+    `percentage asian`,
+    `population over 18`,
+     perchsd,
+    `percentage college`,
+    `percentage below poverty`,
+    `percchildbelowpovert`,
+    `population per sq mile`,
+    everything() # Remain all other columns
+  ) %>%
+  rename(
+    county = `c0unty name`,     
+    area_sq_miles = `area (sq miles)`,
+    poptotal = `total p0pulation`,
+    popdensity = `population density`,
+    percamerindian = percamerindan,
+    percasian = `percentage asian`,
+    popadults = `population over 18`,
+    perc_high_school_diploma = perchsd,
+    perccollege = `percentage college`,
+    percpoverty = `percentage below poverty`,
+    percchildpoverty = `percchildbelowpovert`,
+    pop_per_sq_mile = `population per sq mile`
+  )
+```
+
+
+```{r}
+#| label: Reorder columns
+
+# Step 3: Reorder columns to match the original dataset
+messy.midwest<-messy.midwest %>% 
+  select(PID, county,state, area_sq_miles, poptotal, popdensity, pop_per_sq_mile, popwhite, popblack, popamerindian, popasian, popother, percamerindian, percasian, percother, popadults, perc_high_school_diploma, perccollege, percprof, poppovertyknown, percpovertyknown, percpoverty, percchildpoverty, percadultpoverty, percelderlypoverty, inmetro, category)
+
 
 ```
 
+
 ## Changing data types
 
-```{r}
 
+```{r}
+#| label: Change data types to numeric
+
+# Step 1: Change data type to numeric for variables with decimal numbers
+messy.midwest <- messy.midwest %>%
+  mutate(
+    area_sq_miles = as.numeric(area_sq_miles),
+    popdensity = as.numeric(popdensity),
+    pop_per_sq_mile = as.numeric(pop_per_sq_mile),
+    percamerindian = as.numeric(percamerindian),
+    percasian = as.numeric(percasian),
+    percother = as.numeric(percother),
+    perc_high_school_diploma = as.numeric(perc_high_school_diploma),
+    perccollege = as.numeric(perccollege),
+    percprof = as.numeric(percprof),
+    percpovertyknown = as.numeric(percpovertyknown),
+    percpoverty = as.numeric(percpoverty),
+    percchildpoverty = as.numeric(percchildpoverty),
+    percadultpoverty = as.numeric(percadultpoverty),
+    percelderlypoverty = as.numeric(percelderlypoverty)
+  )
+```
+
+
+```{r}
+#| label: Change data types to integer
+
+# Step 2: Change data type to integer for variables with whole numbers
+messy.midwest <- messy.midwest %>%
+  mutate(
+    poptotal = as.integer(poptotal),
+    popwhite = as.integer(popwhite),
+    popblack = as.integer(popblack),
+    popamerindian = as.integer(popamerindian),
+    popasian = as.integer(popasian),
+    popother = as.integer(popother),
+    popadults = as.integer(popadults),
+    poppovertyknown = as.integer(poppovertyknown)
+  )
+```
+
+```{r}
+#| label: Change data types to factor
+
+# Step 3: Change data type to factor for inmetro and category
+messy.midwest <- messy.midwest %>%
+  mutate(
+    inmetro = as.factor(inmetro),
+    category = as.factor(category) 
+  )
 ```
 
 
 ## Mutating data
 
 ```{r}
+#| label: Add missing columns
+
+# Step 1: Add the missing columns to the messy dataset
+messy.midwest <- messy.midwest %>%
+  mutate(
+    percwhite = popwhite/poptotal*100,
+    percblack = popblack/poptotal*100
+  )
+```
+
+
+```{r}
+#| label: Relocate added columns
+
+# Step 2: Relocate the added columns to the appropriate position
+messy.midwest <- messy.midwest %>%
+  relocate(percwhite, .after = popother) %>%
+  relocate(percblack, .after = percwhite)
+```
+
+
+```{r}
+#| label: Add a new column "percadult"
+
+# Step 3: Add a new column "percadult" to the dataset and relocate it to the appropriate position
+messy.midwest <- messy.midwest %>%
+  mutate(
+    percadults = popadults/poptotal*100
+  ) %>% 
+  relocate(percadults, .after = popadults)
+```
+
+
+```{r}
+#| label: Eliminate redundant or undocumented variables
+
+# Step 4: Eliminate redundant or undocumented variables
+messy.midwest <- messy.midwest %>%
+  select(-popdensity,-category)
 
 ```
 
 
-## Using stringr and forcats
+## Using stringr and forcats (I used forcats in optional tasks)
 
 ```{r}
+#| label: Replace incorrect characters
 
+# Step 1: Replace incorrect characters in county names
+
+# Function to replace numbers in a string with correspondingly correct letters
+replace_numbers <- function(input_string) {
+  input_string %>%
+    str_replace_all("0", "o") %>%
+    str_replace_all("1", "l") %>%
+    str_replace_all("3", "e")
+}
+# Apply the function to county names
+messy.midwest <- messy.midwest %>%
+  mutate(county = replace_numbers(county))
+# Change the county names to upper case
+messy.midwest <- messy.midwest %>%
+  mutate(county = str_to_upper(county))
+```
+
+
+```{r}
+#| label: Unify state names
+
+# Step 2: Unify state names
+
+messy.midwest <- messy.midwest %>%
+  mutate(state = ifelse(state %in% c("Ill.", "Illinois"), "IL", 
+                case_when(
+                  state %in% c("Mich.", "Michigan") ~ "MI",
+                   state %in% c("Wis.", "Wisconsin") ~ "WI",
+                   state %in% c("Ind.", "Indiana") ~ "IN",
+                   state %in% c("OHIO", "Ohio") ~ "OH",
+                   TRUE ~ state 
+                 ))) %>% 
+  arrange(state,county)
 ```
 
 
 ## Other cleaning tasks
 
 ```{r}
+#| label: Address missing values
 
+# Calculate missing values
+colSums(is.na(messy.midwest)) # Find patterns of missing values: 39 in percasian, and 29 in perother
+messy.midwest <- messy.midwest %>%
+mutate(messy.midwest,perasian = ifelse(is.na(percasian),popasian/poptotal*100,percasian),
+       perother = ifelse(is.na(percother),popother/poptotal*100,percother)) %>% 
+  select(-percasian,-percother)  # Should see 0 N/A after this!
+  
+messy.midwest <- messy.midwest %>% #relocate to match the sequence
+  relocate(perasian, .after = percamerindian) %>%
+  relocate(perother, .after = perasian)
 ```
 
+
+```{r}
+#| label: Round decimal numbers
+
+# Round decimal to three decimal places
+clean.midwest <- messy.midwest %>%
+  mutate(across(where(is.numeric), ~round(., 3))) #now we finally have this cleaned dataset!hooray!
+```
+
+```{r}
+#| label: Export cleaned dataset
+
+# Export the cleaned dataset as a csv file
+write.csv(clean.midwest, "cleaned_midwest.csv", row.names = FALSE)
+  
+
+```   
 
 
 
 ## All cleaning in a single pipeline
 
-
 ```{r}
 
 #| label: one-pipeline
-
 
 ```
 
@@ -161,24 +406,487 @@ QUESTIONS:
 1. Is your dataset identical to `midwest`? If not, what is different? (Remember the functions `all.equal()` and `diff_data()` can help here.)
 
 <!-- answer below -->
+No. The dataset is not identical to the `midwest` dataset. The differences include:
+1) I have added a new column "Population per Sq Mile" to the dataset to replace the original dataset's "popdensity" column since the unit for calculating popdensity in the original dataset is unknown. 
+2) I have added a new column "percadult" to the dataset to maintain consistency with other data.
+3) I have deleted category column since it is not documented in the original dataset.
+4) I have rounded the decimal numbers to three decimal places to make the data more readable and consistent.
+Apart from this, it should be the same with the original dataset:)
 
 2. Did you make any choices to clean the data that resulted in the dataset not matching the original? Why did you make those choices?
 
 <!-- answer below -->
+This is basically the answer of the above question:
+Yes, I have made some choices to clean the data that resulted in the dataset not matching the original. I have added a new column "Population per Sq Mile" to the dataset to replace the original dataset's "popdensity" column since the unit for calculating popdensity in the original dataset is unknown. I have also added a new column "percadult" to the dataset to maintain consistency with other data. I have deleted category column since it is not documented in the original dataset. I have rounded the decimal numbers to three decimal places to make the data more readable and consistent.
+I made these choices to improve the dataset's quality and usability and to provide additional insights that are not available in the original dataset.
 
 3. Were there any cleaning steps -- whether necessary to recreate the original df or just because you wanted to do them -- that you weren't able to implement? If so, what were they and what more would you need to do/know to implement them? 
 
 <!-- answer below -->
-
+I was able to implement all the cleaning steps I wanted to perform. Please see more data wrangling, analysis, and visualization in the sections below. 
 
 # Unguided cleaning and transformation
 
 *Optional:* If you have the time and interest, continue transforming this dataset as you please. Create new columns based on the existing ones, reformat strings, try your hand at a regex replacement, summarize by groups (factor levels), visualize a simple relationship, or anything else you can think of. To get you started, consider things like:
 
-1. **Exploratory Data Analysis:** Use the cleaned dataset to explore relationships between variables, create visualizations, and generate insights.
+# Sorry I have to reorder the optiopnal tasks below to serve the data wrangling, analysis, and visualization better. 
+
+1. **Informativity:** Consider the midwest data and its documentation. Clean/transform the dataframe into a format that is more informative, transparent, or easier to work with. For example, improve column naming conventions, create new (useful) variables, reduce redundancy, or eliminate variables that are not useful or documented.
+
+
+I have already finished these in my data cleaning process. However, I would like to further reduce redundancy by eliminating the integer variables with the same information as the percentage variables.
+
+```{r}
+#| label: Reduce redundancy
+
+read.csv("cleaned_midwest.csv") %>%
+  select(-popwhite,-popblack,-popamerindian,-popasian,-popother,-popadults,-poppovertyknown) %>%
+  write.csv("cleaned_midwest2.csv", row.names = FALSE)
+
+```
+
+
 2. **Data Transformation:** Create new variables, aggregate data, or reshape the dataset to prepare it for analysis.
+
+## Read in the cleaned dataset 2 and change data type
+
+```{r,message=FALSE}
+#| label: Read in cleaned dataset 2 and change data type
+
+cleaned.midwest2 <- read_csv("cleaned_midwest2.csv") %>%
+  mutate(
+    PID = as.character(PID),
+    poptotal = as.integer(poptotal),
+    inmetro = as.factor(inmetro))
+
+```
+
+
+## Create a new variable of Ethnic Diversity Index (EDI) based on racial data
+
+```{r}
+#| label: Ethnic Diversity Index
+
+# Create an ethnic diversity index based on racial data based on ED Data (2024)
+
+midwest.race <- cleaned.midwest2 %>%
+   mutate(
+    fraction_white = percwhite / 100,
+    fraction_black = percblack / 100,
+    fraction_amerindian = percamerindian / 100,
+    fraction_asian = perasian / 100,
+    fraction_other = perother / 100
+  ) %>%
+  mutate(
+    # Calculate D5 for each race
+    d5_white = (fraction_white - 1/5)^2,
+    d5_black = (fraction_black - 1/5)^2,
+    d5_amerindian = (fraction_amerindian - 1/5)^2,
+    d5_asian = (fraction_asian - 1/5)^2,
+    d5_other = (fraction_other - 1/5)^2
+  ) %>%
+  # Sum D5 components and calculate EDI for each PID
+  group_by(PID) %>%
+  summarize(
+    D5 = sqrt(sum(c(d5_white, d5_black, d5_amerindian, d5_asian, d5_other))),
+    EDI = 100 + (-111.80340 * D5),
+    EDI_rounded = round(EDI, 2),
+    .groups = 'drop'  # Ungroup after summarizing
+  ) %>%
+  # Join back to original data
+  right_join(cleaned.midwest2, by = "PID") %>% 
+   select(-D5, -EDI) %>% 
+  relocate(EDI_rounded, .after = perother) %>% # Higher index indicates a more even racial distribution
+  arrange(state, county)
+```
+
+## Using forcats to see inmetro's potential statistical power in a (superficial) way
+
+```{r}
+#| label: Using forcats to see inmetro's distribution
+
+midwest.metro <- midwest.race %>% 
+  mutate(inmetro = fct_recode(inmetro, 
+                               "No" = "0", 
+                               "Yes" = "1")) %>%
+  # Calculate frequencies and reorder category levels based on their frequency
+  group_by(inmetro) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  mutate(inmetro = fct_reorder(inmetro, count, .desc = TRUE)) 
+
+# Since inmetro examples are about two times less than non-inmetro examples, we should be cautious when conducting data analysis on inmetro condition's influences on other variables since the larger group may dominate the results, leading to biases in estimates or interpretations. 
+ 
+
+```
+
+
 3. **Split, Merge, and Reshape:** Split the dataset into multiple datasets or merge it with other datasets using `join` functions to create a new dataset. Use `pivot_longer()` and `pivot_wider()` to reshape the data.
-4. **Informativity:** Consider the midwest data and its documentation. Clean/transform the dataframe into a format that is more informative, transparent, or easier to work with. For example, improve column naming conventions, create new (useful) variables, reduce redundancy, or eliminate variables that are not useful or documented.
+
+## Set education level for each education degree based on quartiles and reshape into long data
+
+```{r}
+#| label: Add education level and reshape into long data
+
+
+midwest.long <- midwest.race %>%
+  mutate(                             # Calculate quartiles for each education degree          
+    hs_25th = quantile(perc_high_school_diploma, 0.25, na.rm = TRUE),
+    hs_75th = quantile(perc_high_school_diploma, 0.75, na.rm = TRUE),
+    college_25th = quantile(perccollege, 0.25, na.rm = TRUE),
+    college_75th = quantile(perccollege, 0.75, na.rm = TRUE),
+    prof_25th = quantile(percprof, 0.25, na.rm = TRUE),
+    prof_75th = quantile(percprof, 0.75, na.rm = TRUE)) %>% 
+      mutate(                         # Set education level for each education degree based on quartiles
+    hs_level = case_when(
+      perc_high_school_diploma < hs_25th ~ "low",
+      perc_high_school_diploma > hs_75th ~ "high",
+      perc_high_school_diploma >= hs_25th & perc_high_school_diploma <= hs_75th ~ "medium",
+      TRUE ~ "unknown"  
+    ),
+    college_level = case_when(
+      perccollege < college_25th ~ "low",
+      perccollege > college_75th ~ "high",
+      perccollege >= college_25th & perccollege <= college_75th ~ "medium",
+      TRUE ~ "unknown"
+    ),
+    prof_level = case_when(
+      percprof < prof_25th ~ "low",
+      percprof > prof_75th ~ "high",
+      percprof >= prof_25th & percprof <= prof_75th ~ "medium",
+      TRUE ~ "unknown"  # Optional catch-all case
+    )
+  ) %>%
+  pivot_longer(
+    cols = c(hs_level, college_level, prof_level),
+    names_to = "education_type",
+    values_to = "education_level"
+  ) %>%
+  select(-ends_with("_25th"), -ends_with("_75th")) %>% 
+  mutate(
+    PID = as.character(PID),
+    poptotal = as.integer(poptotal),
+    inmetro = as.factor(inmetro),
+    education_type = as.factor(education_type),
+    education_level = as.factor(education_level))
+  
+
+
+```
+
+
+## Relocate predict and outcome variables to the end of the dataset
+
+```{r}
+#| label: Relocate predict and outcome variables
+
+midwest.long <-midwest.long %>% 
+  relocate (EDI_rounded, .after = education_level) %>%
+  relocate (percpoverty, .after = EDI_rounded)
+
+# Write the long dataset to a csv file for data analysis
+write.csv(midwest.long, "midwest_long.csv", row.names = FALSE)
+
+```
+
+4. **Exploratory Data Analysis:** Use the cleaned dataset to explore relationships between variables, create visualizations, and generate insights.
+
+## Read in the long dataset and change the data type
+
+
+## Descriptive statistics for poverty rate and inmetro distribution
+
+```{r}
+#| label: Descriptive statistics for poverty rate
+
+# Calculate summary statistics for percpoverty
+mean_poverty <- mean(midwest.long$percpoverty, na.rm = TRUE)
+sd_poverty <- sd(midwest.long$percpoverty, na.rm = TRUE)
+min_poverty <- min(midwest.long$percpoverty, na.rm = TRUE)
+max_poverty <- max(midwest.long$percpoverty, na.rm = TRUE)
+median_poverty <- median(midwest.long$percpoverty, na.rm = TRUE)
+
+# Combine results into a data frame for better readability
+
+summary_stats_poverty <- data.frame(
+  Statistic = c("Mean", "Standard Deviation", "Minimum", "Maximum", "Median"),
+  Value = c(mean_poverty, sd_poverty, min_poverty, max_poverty, median_poverty)
+)
+
+# Print summary statistics
+print(summary_stats_poverty)
+
+
+```
+
+```{r}
+#| label: Box plot for poverty rate
+
+box_plot_poverty <- ggplot(midwest.long, aes(y = percpoverty)) +  
+  geom_boxplot(fill = "#0073CF") +
+  labs(title = "Box Plot of Poverty Percentage", y = "Poverty Percentage") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(box_plot_poverty)
+
+# The box plot indicates that the poverty percentage is heavily right-skewed with outliers, implying a huge income gap among the midwest states.
+```
+
+
+```{r}
+#| label: Descriptive statistics for inmetro distribution
+
+# Calculate frequencies and proportions for inmetro distribution
+
+# 1. Calculate Frequencies
+inmetro_freq <- midwest.race %>%  # I use the previous dataset here because it remains wide format
+  mutate(inmetro = ifelse(inmetro == 1, "Yes", "No")) 
+
+frequency_table <- table(inmetro_freq$inmetro)
+print(frequency_table)
+
+# Based on the frequency table, there are 287 counties in the midwest dataset that are not in metropolitan areas, and 150 counties that are in metropolitan areas.
+          
+
+# 2. Calculate Proportions
+proportion_table <- (frequency_table / sum(frequency_table)) * 100
+
+print(proportion_table)
+
+# The proportion table indicates that 65.68% of the counties in the midwest dataset are not in metropolitan areas, while 34.32% of the counties are in metropolitan areas.
+
+
+```
+
+## Hypothesis testing 1 (numeric data): Linear regression between EDI and Poverty Rate
+
+```{r}
+#| label: Linear regression between EDI and percpoverty
+
+# Perform a linear regression between EDI and percpoverty
+poverty.m <- lm(percpoverty ~ EDI_rounded, data = midwest.race)
+summary(poverty.m) 
+
+cor_EDI_poverty <- cor(midwest.race$EDI_rounded, midwest.race$percpoverty)
+print (cor_EDI_poverty)
+
+# The results show that the relationship between EDI and percpoverty is statistically significant (p < .01), r = 0.232, R-squared = 0.054, indicating that EDI only explains 5.4% of the variance in percpoverty, we should conduct analysis on other predict variables as well. 
+
+
+```
+
+```{r}
+#| label: Scatter plot for EDI and percpoverty, with inmetro condition distribution
+# Using function to define a theme for the scatter plot
+theme.clean <- function(){
+  theme_bw()+
+    theme(axis.text.x = element_text(size = 12, vjust = 1, hjust = 1),
+          axis.text.y = element_text(size = 12),
+          axis.title.x = element_text(size = 14, face = "plain"),             
+          axis.title.y = element_text(size = 14, face = "plain"),
+          panel.grid.major.x = element_blank(),                                          
+          panel.grid.minor.x = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          panel.grid.major.y = element_blank(),  
+          plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
+          plot.title = element_text(size = 16, vjust = 1, hjust = 0.5),
+          plot.caption = element_text (size = 8,vjust = 1, hjust = 0.9),
+          legend.text = element_text(size = 12, face = "italic"),          
+          legend.position = "right")}
+
+# Scatter plot for EDI and percpoverty, with inmetro condition distribution
+poverty.p <- ggplot(midwest.race, aes(x = EDI_rounded, y = percpoverty)) +
+      geom_point(aes(colour = inmetro, shape = inmetro)) +                                
+    labs(x = "Ethnic Diversity Index (EDI)", y = "Poverty Rate (Percentage)") +
+    labs (title = "Midwest Counties: Ethnic Diversity Index vs. Poverty Rate", caption = "Source: 2000 US Census Data") + 
+    stat_smooth(method = "lm", aes(fill = inmetro, colour = inmetro)) +    
+    scale_colour_manual(values = c("#FFC125", "#36648B")) +
+    scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+    theme.clean() 
+
+print(poverty.p)  # The scatter plot shows that the poverty rate is positively correlated with Ethnic Diversity Index (EDI), and the relationship is stronger in non-metropolitan areas than in metropolitan areas, indicating that metropolitan condition may be a confounding factor in the relationship between EDI and poverty rate.
+```
+
+
+## Hypothesis testing 2 for categorical data: Metropolitan condition's impact on poverty rate
+
+```{r}
+#| label: Metropolitan condition's impact on poverty rate
+
+# Perform ANOVA to test the impact of metropolitan condition on poverty rate
+
+metro_poverty_anova <- aov(percpoverty ~ inmetro, data = midwest.race)
+summary(metro_poverty_anova) 
+
+# F = 46.74, p < .01, indicating that metropolitan condition has a significant impact on poverty rate.
+
+# Calculate effect size by eta squared
+sum_sq_inmetro <- 1122  
+    sum_sq_total <- 1122 + 10442
+    eta_squared <- sum_sq_inmetro / sum_sq_total
+    print(eta_squared)  # eta squared = 0.097, indicating that 9.7% of the variance in poverty rate can be explained by metropolitan condition.
+
+```
+
+```{r}
+#| label: Box plot for poverty rate by metropolitan condition
+
+metro_poverty_boxplot <- ggplot(midwest.race, aes(x = inmetro, y = percpoverty)) +
+  geom_boxplot(aes(fill = inmetro), show.legend = TRUE) +
+  labs(title = "Midwest Counties: Metropolitan Condition vs. Poverty Rate", 
+       x = "Metropolitan Condition", y = "Poverty Rate (Percentage)",caption = "Source: 2000 US Census Data") + 
+  scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+  theme.clean() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+print (metro_poverty_boxplot)  # The bar plot shows that the poverty rate is higher in non-metropolitan areas than in metropolitan areas. 
+```
+
+
+## Hypothesis testing 3 for education's impact on poverty rate
+
+```{r}
+#| label: Using linear regression with Cohen's d to test high school diploma's impact on poverty rate
+
+# High school diploma's impact on poverty rate by linear regression
+lm_high_school <- lm(percpoverty ~ perc_high_school_diploma, data = midwest.long)
+summary(lm_high_school) # R-squared = 0.34, indicating that 34% of the variance in poverty rate can be explained by the percentage of high school graduates, which is very high. 
+
+cor_high_school <- cor(midwest.long$perc_high_school_diploma, midwest.long$percpoverty)
+print (cor_high_school) # r = -0.58, indicating a strong negative correlation between the percentage of high school graduates and the percentage of people in poverty.
+
+# The effect size of high school diploma on poverty rate by Cohen's d
+cd_high_school<-effsize::cohen.d(midwest.long$perc_high_school_diploma, midwest.long$percpoverty)
+print(cd_high_school) #Cohen's d = 11.17  indicating a very large effect size of high school diploma on poverty rate.
+
+```
+
+
+```{r}
+#| label: Scatter plots for high school diploma and poverty rate with metro condition as a factor
+
+# Scatter plot for high school diploma and poverty rate, with metropolitan condition distribution
+highschool.sp <- ggplot(midwest.long, aes(x = perc_high_school_diploma, y = percpoverty)) +
+      geom_point(aes(colour = inmetro, shape = inmetro)) +                                
+    labs(x = "High School Diploma (Percentage)", y = "Poverty Rate (Percentage)") +
+    labs (title = "Midwest Counties: High School Diploma vs. Poverty Rate", caption = "Source: 2000 US Census Data") + 
+    stat_smooth(method = "lm", aes(fill = inmetro, colour = inmetro)) +    
+    scale_colour_manual(values = c("#FFC125", "#36648B")) +
+    scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+    facet_wrap(~inmetro)+
+    theme.clean() 
+
+print(highschool.sp) 
+
+
+```
+
+
+```{r}
+#| label: Using linear regression with Cohen's d to test college degree's impact on poverty rate
+
+# College degree's impact on poverty rate by linear regression
+lm_college <- lm(percpoverty ~ perccollege, data = midwest.long)
+summary(lm_college) # R-squared = 0.08, indicating that 8% of the variance in poverty rate can be explained by the percentage of college degree, which is relatively low. 
+
+cor_college <- cor(midwest.long$perccollege, midwest.long$percpoverty)
+print (cor_college) # r = -0.28, indicating a moderately negative correlation between the percentage of college graduates and the percentage of people in poverty.
+
+# The effect size of college degree on poverty rate by Cohen's d
+cd_college<-effsize::cohen.d(midwest.long$perccollege, midwest.long$percpoverty)
+print(cd_college) #Cohen's d = 1.01  indicating a large effect size of college degree on poverty rate.
+
+
+```
+
+```{r}
+#| label: Scatter plots for college degree and poverty rate with metro condition as a factor
+
+# Scatter plot for college degree and poverty rate, with metropolitan condition distribution
+college.sp <- ggplot(midwest.long, aes(x = perccollege, y = percpoverty)) +
+      geom_point(aes(colour = inmetro, shape = inmetro)) +                                
+    labs(x = "College Degree (Percentage)", y = "Poverty Rate (Percentage)") +
+    labs (title = "Midwest Counties: College Degree vs. Poverty Rate", caption = "Source: 2000 US Census Data") + 
+    stat_smooth(method = "lm", aes(fill = inmetro, colour = inmetro)) +    
+    scale_colour_manual(values = c("#FFC125", "#36648B")) +
+    scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+    facet_wrap(~inmetro)+
+    theme.clean() 
+
+print(college.sp) 
+
+```
+
+```{r}
+#| label: Using linear regression with Cohen's d to test professional degree's impact on poverty rate
+
+# Professional degree's impact on poverty rate by linear regression
+lm_prof <- lm(percpoverty ~ percprof, data = midwest.long)
+summary(lm_prof) # R-squared = 0.02, indicating that only 2% of the variance in poverty rate can be explained by the percentage of professional degrees, which is very low. 
+
+cor_prof <- cor(midwest.long$percprof, midwest.long$percpoverty)
+print (cor_prof) # r = -0.15, indicating a weak negative correlation between the percentage of professional graduates and the percentage of people in poverty.
+
+# The effect size of professional degree on poverty rate by Cohen's d
+cd_prof<-effsize::cohen.d(midwest.long$percprof, midwest.long$percpoverty)
+print(cd_prof) #Cohen's d = -2.01  indicating a large difference between the percentage of professional graduates and the percentage of people in poverty.
+
+```
+
+```{r}
+#| label: Scatter plots for professional degree and poverty rate with metro condition as a factor
+
+# Scatter plot for professional degree and poverty rate, with metropolitan condition distribution
+prof.sp <- ggplot(midwest.long, aes(x = percprof, y = percpoverty)) +
+      geom_point(aes(colour = inmetro, shape = inmetro)) +                                
+    labs(x = "Professional Degree (Percentage)", y = "Poverty Rate (Percentage)") +
+    labs (title = "Midwest Counties: Professional Degree vs. Poverty Rate", caption = "Source: 2000 US Census Data") + 
+    stat_smooth(method = "lm", aes(fill = inmetro, colour = inmetro)) +    
+    scale_colour_manual(values = c("#FFC125", "#36648B")) +
+    scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+    facet_wrap(~inmetro)+
+    theme.clean() 
+
+print(prof.sp) 
+
+```
+
+
+The above analysis indicates that the percentage of high school graduates has a large effect size on poverty rate, while the percentage of college graduates has a moderate effect size on poverty rate, and the percentage of professional graduates has a small effect size on poverty rate. The relationship between the percentage of high school graduates and poverty rate is stronger than the relationship between the percentage of college graduates and poverty rate, and the relationship between the percentage of professional graduates and poverty rate is the weakest.This could provide insights for policymakers to focus on improving high school education to reduce poverty rates in the midwest states (in 2000, which is funny since the data is older than me)
+
+
+```{r}
+#| label: Using ANOVA to test the impact of education level on poverty rate
+#| 
+anova_edu <- aov(percpoverty ~ education_level, data = midwest.long)
+
+summary(anova_edu)
+
+# The results show that both education level (low, medium, high) has a significant impact on poverty rate
+
+```
+
+```{r}
+#| label: Box plot for poverty rate by education level, differ by metro condition and education type
+
+edu_poverty_boxplot <- ggplot(midwest.long, aes(x = education_level, y = percpoverty)) +
+  geom_boxplot(aes(fill = inmetro), show.legend = TRUE) +
+  labs(title = "Midwest Counties: Education Level vs. Poverty Rate", 
+       x = "Education Level", y = "Poverty Rate (Percentage)",caption = "Source: 2000 US Census Data") + 
+  scale_fill_discrete(name = "Metropolitan County", labels=c('No', 'Yes'))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+  facet_grid(education_type ~ inmetro)+
+  theme.clean() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+print (edu_poverty_boxplot) # The bar plot shows that the poverty rate is lower in counties with higher education levels, and the relationship is stronger in non-metropolitan areas than in metropolitan areas.
+
+```
+
+
+
+
 
 
 # Submission & Assessment
