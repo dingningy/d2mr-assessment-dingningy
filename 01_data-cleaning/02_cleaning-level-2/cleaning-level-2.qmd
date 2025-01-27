@@ -740,7 +740,7 @@ metro_poverty_boxplot <- ggplot(midwest.race, aes(x = inmetro, y = percpoverty))
   theme.clean() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-print (metro_poverty_boxplot)  # The bar plot shows that the poverty rate is higher in non-metropolitan areas than in metropolitan areas. 
+print (metro_poverty_boxplot)  # The box plot shows that the poverty rate is higher in non-metropolitan areas than in metropolitan areas. 
 ```
 
 
@@ -880,7 +880,7 @@ edu_poverty_boxplot <- ggplot(midwest.long, aes(x = education_level, y = percpov
   theme.clean() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-print (edu_poverty_boxplot) # The bar plot shows that the poverty rate is lower in counties with higher education levels, and the relationship is stronger in non-metropolitan areas than in metropolitan areas.
+print (edu_poverty_boxplot) # The box plot shows that the poverty rate is lower in counties with higher education levels, and the relationship is stronger in non-metropolitan areas than in metropolitan areas.
 
 ```
 
