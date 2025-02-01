@@ -96,7 +96,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 6.  Use arithmetic, comparison, and logical operators
@@ -106,7 +106,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 7.  Parse and define functions and arguments
@@ -117,7 +117,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 8.  Parse and write conditional statements and/or loops
@@ -127,7 +127,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 ### Tidyverse
@@ -139,7 +139,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 10. Use `dplyr` and `tidyr` functions to transform data
@@ -150,7 +150,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 11. Use `stringr` functions to work with string variables
@@ -160,7 +160,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 12. Use `forcats` functions to work with factor variables
@@ -170,7 +170,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 ### Data visualization with ggplot2
@@ -182,7 +182,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 14. Use dynamic aesthetics to group data
@@ -191,7 +191,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 15. Use facets to create parallel plots
@@ -202,7 +202,7 @@ Below each learning objective is a list of general expectations for meeting that
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
         -   [ ] Objective met
-        -   Grader comments:
+        -   Grader comments:You would want to modify some grouping aesthetics, such as the number of rows and columns.
 
 16. Create publication-quality plots using `theme` and `labs` layers
 
@@ -213,7 +213,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 ### Data analysis
@@ -226,7 +226,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 18. Perform simple hypothesis testing analyses for multiple data types
@@ -237,7 +237,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 19. Present and interpret statistics in manuscript narrative
@@ -290,7 +290,7 @@ Below each learning objective is a list of general expectations for meeting that
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
         -   [ ] Objective met
-        -   Grader comments: 
+        -   Grader comments: The code chunks came with the assignment template. You can check out this objective when you create your own code chunks.
         
 23. Use code chunks to set up a quarto document
 
@@ -302,7 +302,7 @@ Below each learning objective is a list of general expectations for meeting that
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
         -   [ ] Objective met
-        -   Grader comments:
+        -   Grader comments: Same as above for 3 and 4. Also, you didn't seem to set preferences/options in any code chunk.
 
 24. Render publication-quality tables, figures, and images from code chunks
 
@@ -327,7 +327,7 @@ Below each learning objective is a list of general expectations for meeting that
 
         -   [ ] Objective attempt
         -   [✔] Unique objective attempt
-        -   [ ] Objective met
+        -   [✔] Objective met
         -   Grader comments:
 
 ### R Markdown and quarto
@@ -476,11 +476,11 @@ Thoughtful reflections may earn engagement points.
 
 ## Grader feedback
 
--   Grader:
--   Date:
--   Points toward unique objectives (up to 20):
--   Additional points (up to 20):
--   TA provisional engagement points (up to 10):
+-   Grader: Yuchen Jin
+-   Date: Febuary 1, 2025
+-   Points toward unique objectives (up to 20):15
+-   Additional points (up to 20):8
+-   TA provisional engagement points (up to 10): 4
 -   Final approved engagement points (up to 10):
 -   Total points (up to 50):
 
